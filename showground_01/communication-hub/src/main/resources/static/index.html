@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Communication Hub</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        header {
+            background: #1e293b;
+            padding: 16px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            padding: 16px;
+        }
+        
+        .card {
+            background: #1e293b;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .4);
+        }
+        
+        .card h3 {
+            margin-top: 0;
+            color: #38bdf8;
+        }
+        
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        button {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: #0ea5e9;
+        }
+        
+        .log {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+            white-space: pre-wrap;
+        }
+        
+        #chatLog {
+            height: 220px;
+            overflow-y: auto;
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .msg-user {
+            color: #38bdf8;
+            margin: 4px 0;
+        }
+        
+        .msg-bot {
+            color: #a7f3d0;
+            margin: 4px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>Communication Hub</header>
+    <div class="grid">
+
+        <div class="card">
+            <h3>Email</h3>
+            <input id="emailTo" placeholder="to@example.com">
+            <input id="emailSubject" placeholder="Subject">
+            <textarea id="emailBody" placeholder="Message"></textarea>
+            <button onclick="sendEmail()">Send Email</button>
+            <div class="log" id="emailLog"></div>
+        </div>
+
+        <div class="card">
+            <h3>SMS</h3>
+            <input id="smsTo" placeholder="+1234567890">
+            <textarea id="smsMsg" placeholder="Message"></textarea>
+            <button onclick="sendSms()">Send SMS</button>
+            <div class="log" id="smsLog"></div>
+        </div>
+
+        <div class="card">
+            <h3>WhatsApp</h3>
+            <input id="waTo" placeholder="+1234567890">
+            <textarea id="waMsg" placeholder="Message"></textarea>
+            <button onclick="sendWa()">Send WhatsApp</button>
+            <div class="log" id="waLog"></div>
+        </div>
+
+        <div class="card">
+            <h3>Chatbot</h3>
+            <select id="chatMode">
+      <option value="native">Native (rule-based)</option>
+      <option value="ai">AI (OpenAI)</option>
+    </select>
+            <div id="chatLog"></div>
+            <input id="chatInput" placeholder="Type message..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button onclick="sendChat()">Send</button>
+        </div>
+
+    </div>
+
+    <script>
+        const base = 'http://localhost:8081';
+
+        async function post(url, data) {
+            const r = await fetch(base + url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const response = await r.json();
+            if (!r.ok) {
+                throw new Error(response.message || `Request failed (${r.status})`);
+            }
+            return response.data ?? response;
+        }
+
+        async function sendEmail() {
+            const log = document.getElementById('emailLog');
+            log.textContent = 'Sending...';
+            try {
+                log.textContent = await post('/api/v1/email/send', {
+                    to: emailTo.value,
+                    subject: emailSubject.value,
+                    body: emailBody.value
+                });
+            } catch (e) {
+                log.textContent = 'Error: ' + e.message;
+            }
+        }
+
+        async function sendSms() {
+            const log = document.getElementById('smsLog');
+            log.textContent = 'Sending...';
+            try {
+                log.textContent = await post('/api/v1/sms/send', {
+                    to: smsTo.value,
+                    message: smsMsg.value
+                });
+            } catch (e) {
+                log.textContent = 'Error: ' + e.message;
+            }
+        }
+
+        async function sendWa() {
+            const log = document.getElementById('waLog');
+            log.textContent = 'Sending...';
+            try {
+                log.textContent = await post('/api/v1/whatsapp/send', {
+                    to: waTo.value,
+                    message: waMsg.value
+                });
+            } catch (e) {
+                log.textContent = 'Error: ' + e.message;
+            }
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const chatLog = document.getElementById('chatLog');
+            const text = input.value.trim();
+            if (!text) return;
+
+            chatLog.innerHTML += `<div class="msg-user">You: ${text}</div>`;
+            input.value = '';
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            try {
+                const r = await fetch('/api/v1/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: text,
+                        mode: chatMode.value,
+                        sessionId: 'web'
+                    })
+                });
+                const response = await r.json();
+                if (!r.ok) {
+                    throw new Error(response.message || `Request failed (${r.status})`);
+                }
+                const data = response.data;
+                chatLog.innerHTML += `<div class="msg-bot">Bot: ${data.reply}</div>`;
+                chatLog.scrollTop = chatLog.scrollHeight;
+            } catch (e) {
+                chatLog.innerHTML += `<div class="msg-bot">Error: ${e.message}</div>`;
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,5 @@
+/.vscode/
+/test.java
+/showground_01/communication-hub/.env
+/showground_01/communication-hub/.env.local
+/showground_01/communication-hub/target/
