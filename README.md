@@ -78,7 +78,7 @@ Open `http://localhost:8081/`. The server listens on port `8081` by default.
 
 ### Configure provider credentials
 
-Use [`.env.example`](./.env.example) as a list of supported variable names and safe placeholders. Spring Boot does **not** load `.env` files automatically. Set variables in the terminal or configure them in your IDE's run configuration before starting Maven. In PowerShell, for example:
+Use [`.env.example`](./showground_01/communication-hub/.env.example) as a list of supported variable names and safe placeholders. Spring Boot does **not** load `.env` files automatically. Set variables in the terminal or configure them in your IDE's run configuration before starting Maven. In PowerShell, for example:
 
 ```powershell
 $env:GEMINI_API_KEY = "your-gemini-key"
