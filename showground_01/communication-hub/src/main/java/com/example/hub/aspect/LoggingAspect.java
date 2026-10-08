@@ -26,18 +26,18 @@ public class LoggingAspect {
         String methodName = joinPoint.getSignature().getName();
         Object[] args     = joinPoint.getArgs();
 
-        log.info("→ {}.{}() called with args: {}", className, methodName, safeArgs(args));
+        log.info("{}.{}() called with args: {}", className, methodName, safeArgs(args));
         long start = System.currentTimeMillis();
 
         try {
             Object result = joinPoint.proceed();
             long elapsed = System.currentTimeMillis() - start;
-            log.info("← {}.{}() returned: {} ({} ms)",
+            log.info("{}.{}() returned: {} ({} ms)",
                     className, methodName, safeValue(result), elapsed);
             return result;
         } catch (Throwable ex) {
             long elapsed = System.currentTimeMillis() - start;
-            log.error("✖ {}.{}() threw {}: {} ({} ms)",
+            log.error("{}.{}() threw {}: {} ({} ms)",
                     className, methodName, ex.getClass().getSimpleName(), ex.getMessage(), elapsed);
             throw ex;
         }
