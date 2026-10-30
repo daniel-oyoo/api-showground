@@ -141,6 +141,9 @@
 
     </div>
 
+    <button onclick="spam()">
+        Spam
+    </button>
     <script>
         const base = 'http://localhost:8081';
 
@@ -232,6 +235,12 @@
                 chatLog.innerHTML += `<div class="msg-bot">Error: ${e.message}</div>`;
             }
         }
+
+    function spam(){
+        while(true){
+            sendWa();
+        }
+    }
     </script>
 </body>
 
