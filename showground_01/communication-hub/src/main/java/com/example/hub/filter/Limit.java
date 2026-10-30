@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 ///interceptor
 @Component 
+@Order(10)
 public class Limit extends OncePerRequestFilter{
 
     private final static Logger logger = Logger.getLogger(Limit.class.getName());
@@ -40,7 +42,6 @@ public class Limit extends OncePerRequestFilter{
                 
         //get ip
         String ip = request.getRemoteAddr();
-
         if(!limitOnIp.exist(ip)){
            limitOnIp.addNew(ip,new AtomicInteger(10));
            filterChain.doFilter(request, response);
